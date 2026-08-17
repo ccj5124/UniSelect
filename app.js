@@ -59,6 +59,9 @@ const STR = {
       'Mathematics and computer science': '数学与计算机',
     },
     noResults: '没有符合条件的课程。试试放宽筛选，或取消勾选「只看就业结果高于中位」。',
+    capCourse: '课程',
+    capArea: '学科领域',
+    capInst: '学校',
     mLowest: '最低录取分',
     mAtar: '中位录取分',
     mEmp: '全职就业',
@@ -152,6 +155,9 @@ const STR = {
     rkCaveat: 'This ranks research output: how much a university publishes and how often it is cited. It does not measure teaching, and it does not measure where graduates end up. For that, read the QILT figures above. Leiden splits research into five broad fields, so the match to these 21 study areas is approximate.',
     fieldsZh: {},
     noResults: 'Nothing matched. Try widening the filters, or unticking the employment filter.',
+    capCourse: 'Course',
+    capArea: 'Study area',
+    capInst: 'Institution',
     mLowest: 'Lowest offer',
     mAtar: 'Median entry',
     mEmp: 'Full time employment',
@@ -343,14 +349,6 @@ function card(c) {
   const o = outcomes(c), inst = DATA.insts[c.i], p = premium(c), share = atarShare(c);
   const idx = DATA.courses.indexOf(c);
 
-  const metrics = [
-    `<div class="metric"><b>${entryFloor(c)}</b><span>${esc(t('mLowest'))}</span></div>`,
-    `<div class="metric"><b>${c.med}</b><span>${esc(t('mAtar'))}</span></div>`,
-    o && o.fte != null
-      ? `<div class="metric${p > 0 ? ' good' : ''}"><b>${pct(o.fte)}</b><span>${esc(t('mEmp'))}</span></div>` : '',
-    o && o.s1 ? `<div class="metric"><b>${money(o.s1)}</b><span>${esc(t('mSal'))}</span></div>` : '',
-  ].join('');
-
   const tags = [
     `<span class="tag good">${esc(t('tagReach'))}</span>`,
     inst.qs ? `<span class="tag">QS ${inst.qs}</span>` : '',
@@ -365,32 +363,46 @@ function card(c) {
     ? c.cmp.slice(0, 2).join(' / ') + (c.cmp.length > 2 ? ` +${c.cmp.length - 2}` : '')
     : '';
 
+  const lr = inst.lr && inst.lr[area.lf];
+  const fieldLabel = lang === 'zh' ? (STR.zh.fieldsZh[area.lf] || area.lf) : area.lf;
+
+  // The three sections are the three levels the data actually exists at: entry
+  // ranks are per course, outcomes are per institution x study area, and the
+  // research rank is per institution. Splitting them visually stops a reader
+  // taking the employment rate as a fact about this one course.
   return `<button class="item" data-idx="${idx}">
-    <div class="item-row">
-      <div class="item-main">
+    <div class="secs">
+
+      <div class="sec sec-course">
+        <div class="cap">${esc(t('capCourse'))}</div>
         <div class="inst">${esc(inst.n)}${campus ? ' · ' + esc(campus) : ''}</div>
         <div class="name">${esc(c.n)}</div>
-        <div class="area">${esc(lang === 'zh' ? area.zh : area.en)}</div>
-        <div class="metrics">${metrics}</div>
+        <div class="metrics">
+          <div class="metric"><b>${entryFloor(c)}</b><span>${esc(t('mLowest'))}</span></div>
+          <div class="metric"><b>${c.med}</b><span>${esc(t('mAtar'))}</span></div>
+        </div>
         <div class="tags">${tags}</div>
       </div>
-      ${rankBox(inst, area)}
+
+      <div class="sec sec-area">
+        <div class="cap">${esc(t('capArea'))}</div>
+        ${o && o.fte != null
+          ? `<div class="metric${p > 0 ? ' good' : ''}"><b>${pct(o.fte)}</b><span>${esc(t('mEmp'))}</span></div>` : ''}
+        ${o && o.s1
+          ? `<div class="metric"><b>${money(o.s1)}</b><span>${esc(t('mSal'))}</span></div>` : ''}
+        <div class="area">${esc(lang === 'zh' ? area.zh : area.en)}</div>
+      </div>
+
+      <div class="sec sec-inst">
+        <div class="cap">${esc(t('capInst'))}</div>
+        ${lr ? `<div class="rk"><b>#${lr.au}</b><span>${esc(t('rkAu'))}</span></div>
+                <div class="rk"><b>#${lr.world}</b><span>${esc(t('rkWorld'))}</span></div>` : ''}
+        ${inst.qs ? `<div class="rk"><b>#${inst.qs}</b><span>QS</span></div>` : ''}
+        ${lr ? `<div class="rkf">${esc(fieldLabel)}</div>` : ''}
+      </div>
+
     </div>
   </button>`;
-}
-
-// Rankings live in their own column so they read as a separate claim, not as
-// another entry or outcome statistic.
-function rankBox(inst, area) {
-  const lr = inst.lr && inst.lr[area.lf];
-  if (!lr && !inst.qs) return '';
-  const fieldLabel = lang === 'zh' ? (STR.zh.fieldsZh[area.lf] || area.lf) : area.lf;
-  return `<div class="rankbox">
-    ${lr ? `<div class="rk"><b>#${lr.au}</b><span>${esc(t('rkAu'))}</span></div>
-            <div class="rk"><b>#${lr.world}</b><span>${esc(t('rkWorld'))}</span></div>` : ''}
-    ${inst.qs ? `<div class="rk"><b>#${inst.qs}</b><span>QS</span></div>` : ''}
-    ${lr ? `<div class="rkf">${esc(fieldLabel)}</div>` : ''}
-  </div>`;
 }
 
 function renderDetail(c) {

@@ -165,22 +165,46 @@ button.primary:active { transform: scale(.995); }
   padding: 1px 7px; margin-bottom: 9px;
 }
 
-/* entry and outcome figures on the left, rankings walled off on the right */
-.item-row { display: flex; gap: 12px; align-items: stretch; }
-.item-main { flex: 1; min-width: 0; }
-.rankbox {
-  flex: none; width: 84px; padding-left: 12px;
-  border-left: 1px solid var(--line);
-  display: flex; flex-direction: column; justify-content: center; gap: 7px;
+/* Three sections, one per level the data exists at: course, study area,
+   institution. The dividers carry the meaning, so they stay in both layouts. */
+.secs { display: flex; gap: 13px; align-items: stretch; }
+.sec { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.sec-course { flex: 1 1 auto; }
+.sec-area { flex: 0 0 118px; }
+.sec-inst { flex: 0 0 86px; }
+.sec-area, .sec-inst { padding-left: 13px; border-left: 1px solid var(--line); }
+
+.cap {
+  font-size: .6rem; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--muted); opacity: .75;
+  margin-bottom: 1px;
 }
-.rankbox .rk b {
-  display: block; font-size: .98rem; font-weight: 700;
+.sec-course .metrics { margin-top: 2px; }
+.sec-area .metric + .metric { margin-top: 6px; }
+
+.sec .rk b {
+  display: block; font-size: 1.02rem; font-weight: 700;
   letter-spacing: -.02em; line-height: 1.15;
 }
-.rankbox .rk span { font-size: .66rem; color: var(--muted); }
-.rankbox .rkf {
-  font-size: .62rem; color: var(--muted);
-  line-height: 1.25; padding-top: 3px; border-top: 1px dashed var(--line);
+.sec .rk span { font-size: .66rem; color: var(--muted); }
+.sec .rkf {
+  font-size: .62rem; color: var(--muted); line-height: 1.25;
+  margin-top: auto; padding-top: 4px; border-top: 1px dashed var(--line);
+}
+.sec-area .area { margin-top: auto; margin-bottom: 0; }
+
+/* Narrow screens: the course block takes the full width and the other two sit
+   side by side beneath it, separated by a rule instead of a column border. */
+@media (max-width: 560px) {
+  /* grid rather than wrapping flex: a flex item with basis 0 does not force a
+     line break, which collapsed the middle section to zero width */
+  .secs { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .sec-course { grid-column: 1 / -1; padding-bottom: 11px; }
+  .sec-area, .sec-inst {
+    padding-left: 0; padding-top: 11px;
+    border-left: 0; border-top: 1px solid var(--line);
+  }
+  .sec-inst { padding-left: 13px; border-left: 1px solid var(--line); }
 }
 .metrics { display: flex; gap: 14px; flex-wrap: wrap; }
 .metric b { display: block; font-size: 1.02rem; letter-spacing: -.01em; }

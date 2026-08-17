@@ -159,11 +159,6 @@ button.primary:active { transform: scale(.995); }
 .item:active { background: var(--surface-2); }
 .item .inst { font-size: .78rem; color: var(--muted); }
 .item .name { font-weight: 650; margin: 2px 0 4px; line-height: 1.35; }
-.item .area {
-  display: inline-block; font-size: .72rem; color: var(--accent);
-  background: var(--accent-soft); border-radius: 5px;
-  padding: 1px 7px; margin-bottom: 9px;
-}
 
 /* Three sections, one per level the data exists at: course, study area,
    institution. The dividers carry the meaning, so they stay in both layouts. */
@@ -180,18 +175,25 @@ button.primary:active { transform: scale(.995); }
   margin-bottom: 1px;
 }
 .sec-course .metrics { margin-top: 2px; }
-.sec-area .metric + .metric { margin-top: 6px; }
 
-.sec .rk b {
+/* The study area and institution columns present the same shape of thing (a
+   figure, its label, and the taxonomy it was computed under), so they share one
+   set of rules rather than two that drift apart. */
+.sec-area .metric,
+.sec-inst .rk { margin-bottom: 7px; }
+.sec-area .metric b,
+.sec-inst .rk b {
   display: block; font-size: 1.02rem; font-weight: 700;
-  letter-spacing: -.02em; line-height: 1.15;
+  letter-spacing: -.02em; line-height: 1.2;
 }
-.sec .rk span { font-size: .66rem; color: var(--muted); }
+.sec-area .metric span,
+.sec-inst .rk span {
+  display: block; font-size: .66rem; color: var(--muted); line-height: 1.3;
+}
 .sec .rkf {
   font-size: .62rem; color: var(--muted); line-height: 1.25;
   margin-top: auto; padding-top: 4px; border-top: 1px dashed var(--line);
 }
-.sec-area .area { margin-top: auto; margin-bottom: 0; }
 
 /* Narrow screens: the course block takes the full width and the other two sit
    side by side beneath it, separated by a rule instead of a column border. */
@@ -209,7 +211,6 @@ button.primary:active { transform: scale(.995); }
 .metrics { display: flex; gap: 14px; flex-wrap: wrap; }
 .metric b { display: block; font-size: 1.02rem; letter-spacing: -.01em; }
 .metric span { font-size: .7rem; color: var(--muted); }
-.metric.good b { color: var(--good); }
 
 .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
 .tag {

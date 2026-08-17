@@ -346,7 +346,7 @@ function renderResults() {
 }
 
 function card(c) {
-  const o = outcomes(c), inst = DATA.insts[c.i], p = premium(c), share = atarShare(c);
+  const o = outcomes(c), inst = DATA.insts[c.i], share = atarShare(c);
   const idx = DATA.courses.indexOf(c);
 
   const tags = [
@@ -387,10 +387,10 @@ function card(c) {
       <div class="sec sec-area">
         <div class="cap">${esc(t('capArea'))}</div>
         ${o && o.fte != null
-          ? `<div class="metric${p > 0 ? ' good' : ''}"><b>${pct(o.fte)}</b><span>${esc(t('mEmp'))}</span></div>` : ''}
+          ? `<div class="metric"><b>${pct(o.fte)}</b><span>${esc(t('mEmp'))}</span></div>` : ''}
         ${o && o.s1
           ? `<div class="metric"><b>${money(o.s1)}</b><span>${esc(t('mSal'))}</span></div>` : ''}
-        <div class="area">${esc(lang === 'zh' ? area.zh : area.en)}</div>
+        <div class="rkf">${esc(lang === 'zh' ? area.zh : area.en)}</div>
       </div>
 
       <div class="sec sec-inst">

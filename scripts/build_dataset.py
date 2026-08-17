@@ -2,7 +2,10 @@
 
 Inputs   data/raw/courses.json        Course Seeker course records
          data/raw/qilt_matrix.json    ComparED institution x study area outcomes
-Output   app/data.json                everything the app needs, ~1 file
+Output   data.json                    everything the app needs, ~1 file
+
+The app is served from the repository root because GitHub Pages is configured to
+deploy from a branch, and that mode can only publish the root or /docs.
 
 Scope: bachelor courses that are actively offered and carry a clean entry rank.
 Courses whose institution x study area cell has no published QILT result are kept
@@ -17,7 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RAW = ROOT / "data" / "raw"
-OUT = ROOT / "app"
+OUT = ROOT
 
 AREA_ZH = {
     "Agriculture and Environmental Studies": "农业与环境",

@@ -10,10 +10,12 @@ employment. Both of those are measurable from public government data.
 ## Running it
 
 ```bash
-python -m http.server 8787 --directory app
+python -m http.server 8787
 ```
 
-The app is static: `app/index.html`, `app/styles.css`, `app/app.js`, `app/data.json`.
+The app is static: `index.html`, `styles.css`, `app.js`, `data.json`, served from the
+repository root because GitHub Pages deploys from a branch, which can only publish
+the root or /docs.
 No build step, no dependencies, no backend. It deploys to any static host.
 
 ## Rebuilding the data
@@ -25,7 +27,7 @@ python scripts/build_dataset.py
 ```
 
 The first two write snapshots to `data/raw/`; the third compacts them into
-`app/data.json`. Both fetchers are rate limited and partitioned so no single request
+`data.json`. Both fetchers are rate limited and partitioned so no single request
 is large. Expect to rerun this once a year, after the QILT results and the new
 admissions cycle are published.
 

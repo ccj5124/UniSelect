@@ -40,6 +40,7 @@ const STR = {
     sortSal1: '起薪',
     sortSal5: '五年薪资',
     sortAtar: '门槛由低到高',
+    sortRank: '学校排名',
     sortQs: 'QS 排名',
     qsTitle: 'QS 世界排名',
     qsRank: r => `全球第 ${r} 位`,
@@ -66,7 +67,8 @@ const STR = {
     capArea: '学科领域',
     capInst: '学校',
     mLowest: '最低 offer 排序分',
-    mAtar: '中位录取分',
+    mMedRank: '中位 offer 排序分',
+    mAtar: '中位原始 ATAR',
     mEmp: '全职就业',
     mSal: '起薪中位',
     tagReach: '够得着',
@@ -104,6 +106,7 @@ const STR = {
     eMed: '中位原始 ATAR',
     eLow: '最低原始 ATAR',
     eLowAdj: '最低 selection rank（实际门槛）',
+    eMedAdj: '中位 selection rank',
     eLowAdjNote: '录取按 selection rank 排序，也就是 ATAR 加上你符合条件的加分。要拿到 offer，你的 selection rank 需要达到上面那条「最低 selection rank」。 「最低原始 ATAR」是被录取者里最低的裸分，往往来自某个拿到大额加分的学生，不代表门槛。两者差距越大，说明这门课越依赖加分通道。',
     eYear: '数据采集年份',
     eCampus: '校区',
@@ -148,6 +151,7 @@ const STR = {
     sortSal1: 'Starting salary',
     sortSal5: 'Salary at 5 years',
     sortAtar: 'Lowest bar first',
+    sortRank: 'Institution rank',
     sortQs: 'QS rank',
     qsTitle: 'QS World University Ranking',
     qsRank: r => `#${r} globally`,
@@ -167,7 +171,8 @@ const STR = {
     capArea: 'Study area',
     capInst: 'Institution',
     mLowest: 'Lowest offer rank',
-    mAtar: 'Median entry',
+    mMedRank: 'Median offer rank',
+    mAtar: 'Median raw ATAR',
     mEmp: 'Full time employment',
     mSal: 'Median starting salary',
     tagReach: 'Within reach',
@@ -205,6 +210,7 @@ const STR = {
     eMed: 'Median raw ATAR',
     eLow: 'Lowest raw ATAR admitted',
     eLowAdj: 'Lowest selection rank (the actual bar)',
+    eMedAdj: 'Median selection rank',
     eLowAdjNote: 'Offers are ranked on the selection rank: an ATAR plus whatever adjustment factors the applicant qualifies for. To receive an offer your own selection rank has to reach the lowest selection rank above. The lowest raw ATAR is a different figure, the lowest bare score among people admitted, and it usually belongs to someone holding a large adjustment. The wider the gap between the two, the more this course depends on adjustment pathways.',
     eYear: 'Data collected',
     eCampus: 'Campuses',
@@ -333,6 +339,10 @@ function search() {
     sal5: (a, b) => ((outcomes(b)?.s5) ?? -1) - ((outcomes(a)?.s5) ?? -1),
     atar: (a, b) => a.med - b.med,
     qs: (a, b) => (DATA.insts[a.i].qs ?? 1e6) - (DATA.insts[b.i].qs ?? 1e6),
+    rank: (a, b) => {
+      const r = c => (DATA.insts[c.i].lr || {})[DATA.areas[c.a].lf]?.au ?? 1e6;
+      return r(a) - r(b);
+    },
   };
   rows.sort(sorters[sortKey]);
   return rows;
@@ -353,6 +363,7 @@ function renderResults() {
   $('#sortbar').innerHTML = [
     ['value', 'sortValue'], ['emp', 'sortEmp'], ['sal1', 'sortSal1'],
     ['sal5', 'sortSal5'], ['atar', 'sortAtar'],
+    ...(DATA.meta.leidenCount ? [['rank', 'sortRank']] : []),
     ...(DATA.meta.qsCount ? [['qs', 'sortQs']] : []),
   ].map(([k, s]) =>
     `<button data-sort="${k}" aria-pressed="${k === sortKey}">${esc(t(s))}</button>`).join('');
@@ -397,7 +408,9 @@ function card(c) {
         ${c.code ? `<div class="code">${esc(c.tac || '')} ${esc(c.code)}</div>` : ''}
         <div class="metrics">
           <div class="metric"><b>${entryFloor(c)}</b><span>${esc(t('mLowest'))}</span></div>
-          <div class="metric"><b>${c.med}</b><span>${esc(t('mAtar'))}</span></div>
+          ${c.medAdj != null
+            ? `<div class="metric"><b>${c.medAdj}</b><span>${esc(t('mMedRank'))}</span></div>`
+            : `<div class="metric"><b>${c.med}</b><span>${esc(t('mAtar'))}</span></div>`}
         </div>
         <div class="tags">${tags}</div>
       </div>
@@ -457,6 +470,7 @@ function renderDetail(c) {
   /* ---- entry */
   h += `<div class="card"><h2>${esc(t('dEntryTitle'))}</h2><table class="kv">`;
   if (c.lowAdj != null) h += row(t('eLowAdj'), c.lowAdj);
+  if (c.medAdj != null) h += row(t('eMedAdj'), c.medAdj);
   if (c.low != null) h += row(t('eLow'), c.low);
   h += row(t('eMed'), c.med + (c.medHi ? '–' + c.medHi : ''));
   if (c.yr) h += row(t('eYear'), c.yr);

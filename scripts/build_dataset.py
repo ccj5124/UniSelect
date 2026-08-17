@@ -328,6 +328,11 @@ def main():
             "medHi": round(max(meds), 2) if max(meds) != min(meds) else None,
             "low": fnum(ap.get("lowestAtarUnadjusted")),
             "lowAdj": fnum(ap.get("lowestAtarAdjusted")),
+            # Median on the selection rank scale, so the card can show a lowest
+            # and a median that belong to the same measure. Pairing a selection
+            # rank floor with a raw ATAR median made the "lowest" read higher
+            # than the "median" on 14% of records.
+            "medAdj": fnum(ap.get("medianAtarAdjusted")),
             "yr": ap.get("collectionYear"),
             "pw": pw if pw_total >= 20 else None,
             "pwYr": sp.get("collectionYear") if pw_total >= 20 else None,

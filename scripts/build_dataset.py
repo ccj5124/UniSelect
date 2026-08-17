@@ -126,6 +126,21 @@ def norm_inst(s):
     return re.sub(r"[^a-z0-9]", "", s.replace("&", "and"))
 
 
+def adm_criteria(c):
+    """Selection criteria headings from the admission criteria blob.
+
+    The markup is regular: <h4> is the applicant category, <h5> each criterion
+    ("ATAR", "Interview", "Regional Adjustment", "Supplementary form"). Used to
+    explain why two listings of the same degree carry different entry ranks.
+    """
+    for f in (c.get("features") or []):
+        if f.get("code") == "ADM-CRITERIA":
+            v = f.get("value") or ""
+            return {re.sub(r"\s+", " ", t).strip()
+                    for t in re.findall(r"<h5[^>]*>(.*?)</h5>", v, re.S | re.I)}
+    return set()
+
+
 def expand_leiden(s):
     """Leiden abbreviates: 'Univ Melbourne', 'Queensland Univ Technol'."""
     s = re.sub(r"\bUniv\b", "University", s)
@@ -317,13 +332,36 @@ def main():
             "pw": pw if pw_total >= 20 else None,
             "pwYr": sp.get("collectionYear") if pw_total >= 20 else None,
             "cmp": campuses[:6],
+            "code": rep.get("courseCodeTac"),
+            "tac": rep.get("admissionCentre"),
             "url": rep.get("tacLink"),
+            "_crit": adm_criteria(rep),
             "q": f"{ii}-{ai}" if f"{ii}-{ai}" in qilt else None,
         })
 
     # ------------------------------- per-area medians, used for the "beats the
     # area" comparison the app makes. Computed on the shipped course set so the
     # figure the user sees is the figure the ranking used.
+    # A tertiary admissions centre often lists one degree under several codes,
+    # one per applicant category or selection route, each with its own entry
+    # rank. Three La Trobe "Bachelor of Oral Health Science" listings at Bendigo
+    # range from 60.65 to 80.15 for exactly this reason. Where that happens,
+    # record what actually differs so the cards can say why, instead of looking
+    # like the same course repeated with contradictory numbers.
+    sibling = defaultdict(list)
+    for c in out_courses:
+        sibling[(c["i"], re.sub(r"\s+", " ", c["n"]).strip().lower(), c["a"])].append(c)
+
+    for group in sibling.values():
+        if len(group) > 1:
+            shared = set.intersection(*(c["_crit"] for c in group)) if all(c["_crit"] for c in group) else set()
+            for c in group:
+                only = sorted(c["_crit"] - shared)
+                if only:
+                    c["dif"] = only[:3]
+    for c in out_courses:
+        c.pop("_crit", None)
+
     for ai, a in enumerate(areas):
         a["lf"] = AREA_TO_LEIDEN.get(a["en"], "All sciences")
         cs = [c for c in out_courses if c["a"] == ai]

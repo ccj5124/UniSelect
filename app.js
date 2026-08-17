@@ -71,6 +71,8 @@ const STR = {
     tagAdj: a => `加分后 ${a} 可入`,
     tagAtarShare: p => `仅 ${p}% 靠 ATAR 录取`,
     tagNoOutcome: '官方未发布结果数据',
+    tagOnly: d => `此代码专有：${d}`,
+    dSiblings: '同一学位在招生中心下有多个代码，各自的申请类别和选拔方式不同，录取分因此不同。上面的代码对应官方页面上的这一条。',
     dPathTitle: '这门课的学生实际是怎么进来的',
     dPathLead: n => `基于该校该课程 ${n} 名录取学生的官方入学途径分解。`,
     pAtar: '纯 ATAR 录取',
@@ -167,6 +169,8 @@ const STR = {
     tagAdj: a => `${a} with adjustments`,
     tagAtarShare: p => `only ${p}% admitted on ATAR`,
     tagNoOutcome: 'Outcomes not published',
+    tagOnly: d => `only on this code: ${d}`,
+    dSiblings: 'Admissions centres list one degree under several codes, each for a different applicant category or selection route, which is why the entry ranks differ. The code above identifies this particular listing on the official site.',
     dPathTitle: 'How students actually got in',
     dPathLead: n => `Official admission pathway breakdown for ${n} admitted students.`,
     pAtar: 'ATAR alone',
@@ -353,6 +357,7 @@ function card(c) {
     `<span class="tag good">${esc(t('tagReach'))}</span>`,
     inst.qs ? `<span class="tag">QS ${inst.qs}</span>` : '',
     adjHelps(c) ? `<span class="tag">${esc(t('tagAdj', c.lowAdj))}</span>` : '',
+    ...(c.dif || []).map(d => `<span class="tag info">${esc(t('tagOnly', d))}</span>`),
     share != null && share < 40 ? `<span class="tag warn">${esc(t('tagAtarShare', Math.round(share)))}</span>` : '',
     !o ? `<span class="tag">${esc(t('tagNoOutcome'))}</span>` : '',
     ...c.st.map(s => `<span class="tag">${esc(s)}</span>`),
@@ -377,6 +382,7 @@ function card(c) {
         <div class="cap">${esc(t('capCourse'))}</div>
         <div class="inst">${esc(inst.n)}${campus ? ' · ' + esc(campus) : ''}</div>
         <div class="name">${esc(c.n)}</div>
+        ${c.code ? `<div class="code">${esc(c.tac || '')} ${esc(c.code)}</div>` : ''}
         <div class="metrics">
           <div class="metric"><b>${entryFloor(c)}</b><span>${esc(t('mLowest'))}</span></div>
           <div class="metric"><b>${c.med}</b><span>${esc(t('mAtar'))}</span></div>
@@ -443,8 +449,10 @@ function renderDetail(c) {
   if (c.lowAdj != null) h += row(t('eLowAdj'), c.lowAdj);
   if (c.yr) h += row(t('eYear'), c.yr);
   if (c.cmp && c.cmp.length) h += row(t('eCampus'), c.cmp.join(', '));
+  if (c.code) h += row(`${c.tac || ''} code`.trim(), c.code);
   h += `</table>`;
   if (c.lowAdj != null) h += `<p class="fine" style="margin:10px 0 0">${esc(t('eLowAdjNote'))}</p>`;
+  if (c.dif && c.dif.length) h += `<p class="fine" style="margin:8px 0 0">${esc(t('dSiblings'))}</p>`;
   if (c.url) h += `<p style="margin:12px 0 0"><a class="ext" href="${esc(c.url)}" target="_blank" rel="noopener">${esc(t('dOfficial'))} ↗</a></p>`;
   h += `</div>`;
 

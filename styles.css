@@ -158,7 +158,8 @@ button.primary:active { transform: scale(.995); }
 }
 .item:active { background: var(--surface-2); }
 .item .inst { font-size: .78rem; color: var(--muted); }
-.item .name { font-weight: 650; margin: 2px 0 4px; line-height: 1.35; }
+.item .name { font-weight: 650; margin: 2px 0 3px; line-height: 1.35; }
+.item .code { font-size: .68rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 
 /* Three sections, one per level the data exists at: course, study area,
    institution. The dividers carry the meaning, so they stay in both layouts. */
@@ -219,6 +220,7 @@ button.primary:active { transform: scale(.995); }
 }
 .tag.good { background: var(--good-soft); color: var(--good); font-weight: 600; }
 .tag.warn { background: var(--warn-soft); color: var(--warn); }
+.tag.info { background: var(--accent-soft); color: var(--accent); }
 
 .empty { text-align: center; color: var(--muted); padding: 32px 12px; }
 

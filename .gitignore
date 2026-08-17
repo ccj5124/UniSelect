@@ -1,0 +1,10 @@
+# Raw source snapshots: large (courses.json alone is 86 MB) and fully
+# regenerable by scripts/fetch_courseseeker.py, fetch_compared.py, fetch_leiden.py
+data/raw/
+
+# The built dataset in app/ IS committed, since that is what the site serves.
+
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

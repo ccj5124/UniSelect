@@ -10,7 +10,9 @@ const STR = {
     heroTitle: '你的分数，能去的比你以为的多',
     heroSub: '用官方录取数据和毕业生就业结果，找出门槛在你射程内、但结果高于同领域平均的课程。顺便告诉你，这些学校到底有多少人是靠 ATAR 进去的。',
     fATAR: '你的 ATAR / Selection Rank',
-    fATARHint: '还没出分？填一个预估值即可。加分（adjustment factors）会在结果里单独标注。',
+    fATARHint: '还没出分？填一个预估值即可。',
+    fAdj: '预计加分（可留空）',
+    fAdjHint: '澳洲录取排的是 selection rank，也就是 ATAR 加上你符合条件的各类加分：区域加分、学科加分、SEAS 教育弱势补偿等。不确定就留空，按无加分计算。',
     fKeyword: '课程或学校关键词',
     fKeywordHint: '按名字搜比按领域找更准。政府的学科分类不直观，比如物理治疗被归在「康复治疗」下面，还有一部分散在「医学」和「理科」里。',
     fArea: '学科领域',
@@ -25,6 +27,7 @@ const STR = {
     statInsts: '所院校',
     statCells: '个院校×学科单元',
     resFound: n => `${n} 门课程在你的射程内`,
+    yourRank: (a, r) => `按 selection rank ${r} 计算（ATAR ${a}${r > a ? ' + 加分 ' + Math.round((r - a) * 100) / 100 : ''}）。`,
     resSubBoth: (a, e) => `该领域中位入学门槛 ${a}，中位全职就业率 ${e}%`,
     excluded: (rank, out) => {
       const p = [];
@@ -62,13 +65,13 @@ const STR = {
     capCourse: '课程',
     capArea: '学科领域',
     capInst: '学校',
-    mLowest: '最低录取分',
+    mLowest: '最低 offer 排序分',
     mAtar: '中位录取分',
     mEmp: '全职就业',
     mSal: '起薪中位',
     tagReach: '够得着',
     tagStretch: '需冲刺',
-    tagAdj: a => `加分后 ${a} 可入`,
+    tagAdj: g => `有人靠 ${g} 分加分进入`,
     tagAtarShare: p => `仅 ${p}% 靠 ATAR 录取`,
     tagNoOutcome: '官方未发布结果数据',
     tagOnly: d => `此代码专有：${d}`,
@@ -98,10 +101,10 @@ const STR = {
     s9: '毕业 9 年',
     natAvg: v => `全国 ${v}`,
     dEntryTitle: '入学门槛',
-    eMed: '中位录取分（不含加分）',
-    eLow: '最低录取分（不含加分）',
-    eLowAdj: '最低 selection rank（含加分）',
-    eLowAdjNote: 'selection rank 是 ATAR 加上各类加分后的分数，用于实际排序。它通常高于最低 ATAR：一个 ATAR 较低但拿到加分的学生，最终排序分可能更高。判断自己是否够得着，看上面那行「最低录取分」。',
+    eMed: '中位原始 ATAR',
+    eLow: '最低原始 ATAR',
+    eLowAdj: '最低 selection rank（实际门槛）',
+    eLowAdjNote: '录取按 selection rank 排序，也就是 ATAR 加上你符合条件的加分。要拿到 offer，你的 selection rank 需要达到上面那条「最低 selection rank」。 「最低原始 ATAR」是被录取者里最低的裸分，往往来自某个拿到大额加分的学生，不代表门槛。两者差距越大，说明这门课越依赖加分通道。',
     eYear: '数据采集年份',
     eCampus: '校区',
     dOfficial: '查看官方课程页面',
@@ -115,7 +118,9 @@ const STR = {
     heroTitle: 'Your rank opens more doors than you think',
     heroSub: 'Official entry data matched to published graduate outcomes, to surface courses within your reach that beat their field on results. Plus how many students actually got in on an ATAR.',
     fATAR: 'Your ATAR / selection rank',
-    fATARHint: 'No result yet? An estimate works. Adjustment factors are flagged separately in the results.',
+    fATARHint: 'No result yet? An estimate works.',
+    fAdj: 'Adjustment points you expect (optional)',
+    fAdjHint: 'Australian offers are ranked on your selection rank: your ATAR plus any adjustment factors you qualify for, such as regional, subject or SEAS adjustments. Leave blank to assume none.',
     fKeyword: 'Course or institution keyword',
     fKeywordHint: 'Searching by name beats browsing by field. The government taxonomy is not intuitive: physiotherapy sits under "Rehabilitation", with more of it filed under Medicine and Science.',
     fArea: 'Study area',
@@ -130,6 +135,7 @@ const STR = {
     statInsts: 'institutions',
     statCells: 'institution x field cells',
     resFound: n => `${n} courses within your reach`,
+    yourRank: (a, r) => `Assessed on a selection rank of ${r} (ATAR ${a}${r > a ? ' plus ' + Math.round((r - a) * 100) / 100 + ' adjustment' : ''}).`,
     resSubBoth: (a, e) => `Field median entry rank ${a}, median full time employment ${e}%`,
     excluded: (rank, out) => {
       const p = [];
@@ -160,13 +166,13 @@ const STR = {
     capCourse: 'Course',
     capArea: 'Study area',
     capInst: 'Institution',
-    mLowest: 'Lowest offer',
+    mLowest: 'Lowest offer rank',
     mAtar: 'Median entry',
     mEmp: 'Full time employment',
     mSal: 'Median starting salary',
     tagReach: 'Within reach',
     tagStretch: 'A stretch',
-    tagAdj: a => `${a} with adjustments`,
+    tagAdj: g => `someone got in on ${g} points of adjustment`,
     tagAtarShare: p => `only ${p}% admitted on ATAR`,
     tagNoOutcome: 'Outcomes not published',
     tagOnly: d => `only on this code: ${d}`,
@@ -196,10 +202,10 @@ const STR = {
     s9: '9 years out',
     natAvg: v => `national ${v}`,
     dEntryTitle: 'Entry requirements',
-    eMed: 'Median ATAR (before adjustments)',
-    eLow: 'Lowest ATAR to receive an offer',
-    eLowAdj: 'Lowest selection rank (with adjustments)',
-    eLowAdjNote: 'A selection rank is an ATAR plus any adjustment factors, and it is what offers are actually ranked on. It usually sits above the lowest ATAR: a student with a lower ATAR who earned adjustments can end up ranked higher. To judge whether a course is within reach, use the lowest ATAR above.',
+    eMed: 'Median raw ATAR',
+    eLow: 'Lowest raw ATAR admitted',
+    eLowAdj: 'Lowest selection rank (the actual bar)',
+    eLowAdjNote: 'Offers are ranked on the selection rank: an ATAR plus whatever adjustment factors the applicant qualifies for. To receive an offer your own selection rank has to reach the lowest selection rank above. The lowest raw ATAR is a different figure, the lowest bare score among people admitted, and it usually belongs to someone holding a large adjustment. The wider the gap between the two, the more this course depends on adjustment pathways.',
     eYear: 'Data collected',
     eCampus: 'Campuses',
     dOfficial: 'View the official course page',
@@ -240,17 +246,22 @@ const pct = n => n == null ? '—' : n.toFixed(1) + '%';
 
 /* --------------------------------------------------------------- helpers */
 
-// Compare a raw ATAR against the lowest ATAR that received an offer, which is
-// what every public source headlines. Do NOT use lowAdj here: despite the name,
-// `lowestAtarAdjusted` is the lowest SELECTION RANK (ATAR plus adjustment
-// factors), and it runs higher than the raw floor in 91% of records, by a median
-// of 6.7 points and up to 38. Using it as the threshold hides courses the student
-// can actually reach.
-const entryFloor = c => c.low ?? c.lowAdj ?? c.med;
+// Offers are ranked on the selection rank, which is a student's ATAR plus any
+// adjustment factors they personally qualify for. So the bar to clear is
+// `lowestAtarAdjusted`, the lowest selection rank that actually received an
+// offer, and the figure to compare against it is the user's own selection rank.
+//
+// `lowestAtarUnadjusted` is a different thing: the lowest RAW ATAR among people
+// admitted, which goes very low whenever one admitted student held a large
+// adjustment. La Trobe nursing shows a raw floor of 42.8 against a selection
+// rank floor of 62.3. Treating the raw floor as the threshold told a student
+// with no adjustments that 23% more courses were within reach than really were.
+const entryFloor = c => c.lowAdj ?? c.low ?? c.med;
 
-// The 2% of records where the adjusted figure sits below the raw floor are the
-// ones where adjustment factors demonstrably pulled the bar down.
-const adjHelps = c => c.lowAdj != null && c.low != null && c.lowAdj < c.low;
+// Where the raw floor sits below the selection rank floor, somebody got in on a
+// substantial adjustment, which is worth flagging to a student who may qualify.
+const adjGap = c => (c.lowAdj != null && c.low != null && c.lowAdj - c.low >= 3)
+  ? Math.round((c.lowAdj - c.low) * 10) / 10 : null;
 
 const outcomes = c => (c.q && DATA.qilt[c.q]) || null;
 
@@ -294,7 +305,7 @@ function homeStats() {
 }
 
 function search() {
-  const { atar, area, state, keyword, onlyGood } = query;
+  const { rank, area, state, keyword, onlyGood } = query;
   const kw = keyword.trim().toLowerCase();
 
   // Match on the user's terms first, then count what each filter removes, so the
@@ -306,7 +317,7 @@ function search() {
     return true;
   });
 
-  const inReach = matched.filter(c => entryFloor(c) <= atar);
+  const inReach = matched.filter(c => entryFloor(c) <= rank);
   let rows = inReach;
   let cutByOutcome = 0;
   if (onlyGood) {
@@ -334,6 +345,7 @@ function renderResults() {
   const s = search.stats || { aboveRank: 0, cutByOutcome: 0 };
   $('#resTitle').textContent = t('resFound', rows.length);
   $('#resSub').textContent = [
+    t('yourRank', query.atar, query.rank),
     area && area.medAtar != null && area.medFte != null ? t('resSubBoth', area.medAtar, area.medFte) : '',
     t('excluded', s.aboveRank, s.cutByOutcome),
   ].filter(Boolean).join(' ');
@@ -356,7 +368,7 @@ function card(c) {
   const tags = [
     `<span class="tag good">${esc(t('tagReach'))}</span>`,
     inst.qs ? `<span class="tag">QS ${inst.qs}</span>` : '',
-    adjHelps(c) ? `<span class="tag">${esc(t('tagAdj', c.lowAdj))}</span>` : '',
+    adjGap(c) ? `<span class="tag">${esc(t('tagAdj', adjGap(c)))}</span>` : '',
     ...(c.dif || []).map(d => `<span class="tag info">${esc(t('tagOnly', d))}</span>`),
     share != null && share < 40 ? `<span class="tag warn">${esc(t('tagAtarShare', Math.round(share)))}</span>` : '',
     !o ? `<span class="tag">${esc(t('tagNoOutcome'))}</span>` : '',
@@ -444,9 +456,9 @@ function renderDetail(c) {
 
   /* ---- entry */
   h += `<div class="card"><h2>${esc(t('dEntryTitle'))}</h2><table class="kv">`;
+  if (c.lowAdj != null) h += row(t('eLowAdj'), c.lowAdj);
   if (c.low != null) h += row(t('eLow'), c.low);
   h += row(t('eMed'), c.med + (c.medHi ? '–' + c.medHi : ''));
-  if (c.lowAdj != null) h += row(t('eLowAdj'), c.lowAdj);
   if (c.yr) h += row(t('eYear'), c.yr);
   if (c.cmp && c.cmp.length) h += row(t('eCampus'), c.cmp.join(', '));
   if (c.code) h += row(`${c.tac || ''} code`.trim(), c.code);
@@ -547,8 +559,10 @@ async function init() {
     e.preventDefault();
     const atar = parseFloat($('#atar').value);
     if (!(atar >= 30 && atar <= 100)) { $('#atar').focus(); return; }
+    const adj = parseFloat($('#adj').value) || 0;
     query = {
-      atar, area: $('#area').value, state: $('#state').value,
+      atar, adj, rank: Math.round((atar + adj) * 100) / 100,
+      area: $('#area').value, state: $('#state').value,
       keyword: $('#keyword').value, onlyGood: $('#onlyGood').checked,
     };
     location.hash = '#/r';
